@@ -3,131 +3,186 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Skill Translator</title>
+<title>Progressive Candidate Directory</title>
 <style>
-  :root{
-    --ink:#1b1b18; --paper:#fbf9f4; --rule:#d8d2c4;
-    --accent:#1f5c4d; --accent-soft:#e3ede9; --flag:#b5472b;
-  }
-  *{box-sizing:border-box;}
-  body{
-    font-family:'Iowan Old Style','Georgia',serif; color:var(--ink);
-    background:var(--paper); margin:0; padding:32px 20px 60px;
-  }
-  .wrap{max-width:700px;margin:0 auto;}
-  .eyebrow{font-family:'Courier New',monospace;font-size:11px;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
-  h1{font-size:28px;line-height:1.15;margin:0 0 8px;font-weight:600;}
-  .sub{font-size:14.5px;color:#5c574c;margin:0 0 28px;max-width:56ch;line-height:1.5;}
-  .field{margin-bottom:20px;}
-  label{display:block;font-family:'Courier New',monospace;font-size:11px;letter-spacing:.08em;
-    text-transform:uppercase;color:#7a7568;margin-bottom:7px;}
-  textarea{width:100%;border:1px solid var(--rule);background:#fff;border-radius:3px;
-    padding:12px 13px;font-family:'Iowan Old Style','Georgia',serif;font-size:14.5px;
-    line-height:1.5;color:var(--ink);resize:vertical;}
-  textarea:focus{outline:2px solid var(--accent);outline-offset:1px;}
-  button{font-family:'Courier New',monospace;font-size:12.5px;letter-spacing:.06em;
-    text-transform:uppercase;background:var(--accent);color:#fff;border:none;
-    padding:12px 20px;border-radius:3px;cursor:pointer;}
-  button:disabled{background:#a9a496;cursor:default;}
-  button:hover:not(:disabled){background:#174a3e;}
-  .err{color:var(--flag);font-size:13px;margin-top:10px;}
-  .results{margin-top:36px;}
-  hr{border:none;border-top:1px solid var(--rule);margin:30px 0;}
-  .result-head{font-family:'Courier New',monospace;font-size:11px;letter-spacing:.1em;
-    text-transform:uppercase;color:var(--accent);margin-bottom:14px;}
-  .item{border-left:2px solid var(--accent-soft);padding:4px 0 16px 16px;margin-bottom:4px;}
-  .item .raw{font-size:12.5px;color:#8c8576;font-style:italic;margin-bottom:4px;}
-  .item .line{font-size:15.5px;line-height:1.5;}
-  .skill-tag{display:inline-block;font-family:'Courier New',monospace;font-size:10.5px;
-    letter-spacing:.05em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);
-    padding:2px 7px;border-radius:2px;margin-bottom:6px;}
-  .copyall{margin-top:18px;background:transparent;color:var(--accent);border:1px solid var(--accent);}
-  .copyall:hover{background:var(--accent-soft);}
-  .loading{font-family:'Courier New',monospace;font-size:12.5px;color:#7a7568;margin-top:14px;}
+  :root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#238636;--accent2:#1f6feb;--tag:#21262d;--red:#da3633;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;}
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:20px 24px;display:flex;align-items:center;gap:16px;}
+  .logo{width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+  header h1{font-size:18px;font-weight:600;}
+  header p{font-size:13px;color:var(--muted);margin-top:2px;}
+  .controls{padding:20px 24px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--border);}
+  input,select{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-size:14px;}
+  input{flex:1;min-width:200px;}
+  input:focus,select:focus{outline:none;border-color:var(--accent2);}
+  .count{color:var(--muted);font-size:13px;margin-left:auto;}
+  .grid{padding:16px 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;transition:border-color .15s;}
+  .card:hover{border-color:var(--accent2);}
+  .card-name{font-size:16px;font-weight:600;margin-bottom:4px;}
+  .card-office{font-size:13px;color:var(--accent2);margin-bottom:8px;}
+  .card-location{font-size:13px;color:var(--muted);margin-bottom:10px;}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .tag{font-size:11px;padding:2px 8px;border-radius:12px;background:var(--tag);border:1px solid var(--border);color:var(--muted);}
+  .tag.dsa{border-color:#e05252;color:#e05252;}
+  .tag.jr{border-color:#f0883e;color:#f0883e;}
+  .tag.or{border-color:#3fb950;color:#3fb950;}
+  .tag.sa{border-color:#a371f7;color:#a371f7;}
+  .card-link{display:inline-block;font-size:12px;color:var(--accent2);text-decoration:none;}
+  .card-link:hover{text-decoration:underline;}
+  .empty{grid-column:1/-1;text-align:center;padding:60px;color:var(--muted);}
+  .add-btn{background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;cursor:pointer;font-weight:500;}
+  .add-btn:hover{background:#2ea043;}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;width:90%;max-width:480px;}
+  .modal h2{font-size:16px;margin-bottom:16px;}
+  .form-field{margin-bottom:12px;}
+  .form-field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;}
+  .form-field input,.form-field select{width:100%;}
+  .form-row{display:flex;gap:8px;}
+  .form-row .form-field{flex:1;}
+  .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+  .btn-cancel{background:transparent;color:var(--muted);border:1px solid var(--border);padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;}
+  .btn-save{background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;}
+  .updated{font-size:11px;color:var(--muted);margin-top:8px;}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="eyebrow">Skill translator</div>
-  <h1>Find the resume language hiding in how you actually talk about your work</h1>
-  <p class="sub">Paste a job description and describe your work history in your own words — informally is fine. This finds the skills the job is looking for and rewrites your experience to surface them.</p>
 
-  <div class="field">
-    <label>Job description</label>
-    <textarea id="jd" rows="6" placeholder="Paste the job posting here..."></textarea>
+<header>
+  <div class="logo">✊</div>
+  <div>
+    <h1>Progressive Candidate Directory</h1>
+    <p>Democratic socialists & progressive Democrats running for office across the US</p>
   </div>
-  <div class="field">
-    <label>Your work history</label>
-    <textarea id="history" rows="8" placeholder="Describe what you did, however you'd naturally say it. Informal is fine."></textarea>
-  </div>
+  <button class="add-btn" onclick="openModal()" style="margin-left:auto">+ Add Candidate</button>
+</header>
 
-  <button id="genBtn">Rewrite for this job</button>
-  <div id="loading" class="loading" style="display:none">Reading the posting, matching it against what you wrote…</div>
-  <div id="error" class="err" style="display:none"></div>
-  <div id="results" class="results" style="display:none"></div>
+<div class="controls">
+  <input type="text" id="search" placeholder="Search by name, city, county…" oninput="render()">
+  <select id="stateFilter" onchange="render()">
+    <option value="">All States</option>
+  </select>
+  <select id="officeFilter" onchange="render()">
+    <option value="">All Offices</option>
+  </select>
+  <select id="endorseFilter" onchange="render()">
+    <option value="">All Endorsements</option>
+    <option value="DSA">DSA</option>
+    <option value="Justice Democrats">Justice Democrats</option>
+    <option value="Our Revolution">Our Revolution</option>
+    <option value="Socialist Alternative">Socialist Alternative</option>
+  </select>
+  <span class="count" id="count"></span>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2>Add Candidate</h2>
+    <div class="form-field"><label>Full Name *</label><input id="f-name" placeholder="Jane Smith"></div>
+    <div class="form-field"><label>Office Sought *</label><input id="f-office" placeholder="U.S. Representative, State Senator, Mayor…"></div>
+    <div class="form-row">
+      <div class="form-field"><label>City</label><input id="f-city" placeholder="Chicago"></div>
+      <div class="form-field"><label>County</label><input id="f-county" placeholder="Cook"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field"><label>State (2-letter) *</label><input id="f-state" placeholder="IL" maxlength="2" style="text-transform:uppercase"></div>
+      <div class="form-field"><label>Endorsements (comma separated)</label><input id="f-endorse" placeholder="DSA, Our Revolution"></div>
+    </div>
+    <div class="form-field"><label>Campaign Website</label><input id="f-site" placeholder="https://…"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveCandidate()">Add to Directory</button>
+    </div>
+  </div>
 </div>
 
 <script>
-const genBtn = document.getElementById('genBtn');
-const resultsEl = document.getElementById('results');
-const errorEl = document.getElementById('error');
-const loadingEl = document.getElementById('loading');
+let candidates = [];
 
-genBtn.addEventListener('click', async () => {
-  const jd = document.getElementById('jd').value.trim();
-  const history = document.getElementById('history').value.trim();
-  errorEl.style.display = 'none';
-  resultsEl.style.display = 'none';
-  resultsEl.innerHTML = '';
+const tagClass = e => {
+  if(e==='DSA') return 'dsa';
+  if(e==='Justice Democrats') return 'jr';
+  if(e==='Our Revolution') return 'or';
+  if(e==='Socialist Alternative') return 'sa';
+  return '';
+};
 
-  if (!jd || !history) {
-    errorEl.textContent = 'Paste both the job description and your work history first.';
-    errorEl.style.display = 'block';
+function render(){
+  const q = document.getElementById('search').value.toLowerCase();
+  const st = document.getElementById('stateFilter').value;
+  const of = document.getElementById('officeFilter').value;
+  const en = document.getElementById('endorseFilter').value;
+
+  const filtered = candidates.filter(c => {
+    const matchQ = !q || [c.name,c.city,c.county,c.state,c.office].join(' ').toLowerCase().includes(q);
+    const matchSt = !st || c.state===st;
+    const matchOf = !of || c.office===of;
+    const matchEn = !en || (c.endorsements||[]).includes(en);
+    return matchQ && matchSt && matchOf && matchEn;
+  });
+
+  document.getElementById('count').textContent = `${filtered.length} candidate${filtered.length!==1?'s':''}`;
+
+  const grid = document.getElementById('grid');
+  if(!filtered.length){
+    grid.innerHTML = '<div class="empty">No candidates match your filters.</div>';
     return;
   }
+  grid.innerHTML = filtered.map(c => `
+    <div class="card">
+      <div class="card-name">${c.name}</div>
+      <div class="card-office">${c.office}</div>
+      <div class="card-location">📍 ${[c.city,c.county?c.county+' Co.':'',c.state].filter(Boolean).join(', ')}</div>
+      <div class="tags">${(c.endorsements||[]).map(e=>`<span class="tag ${tagClass(e)}">${e}</span>`).join('')}</div>
+      ${c.website?`<a class="card-link" href="${c.website}" target="_blank">Campaign website →</a>`:''}
+      <div class="updated">Updated ${c.last_updated||'unknown'}</div>
+    </div>`).join('');
+}
 
-  genBtn.disabled = true;
-  genBtn.textContent = 'Rewriting…';
-  loadingEl.style.display = 'block';
+function populateFilters(){
+  const states = [...new Set(candidates.map(c=>c.state))].sort();
+  const offices = [...new Set(candidates.map(c=>c.office))].sort();
+  const sf = document.getElementById('stateFilter');
+  const of = document.getElementById('officeFilter');
+  states.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sf.appendChild(o);});
+  offices.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;of.appendChild(o);});
+}
 
-  try {
-    const res = await fetch('/api/rewrite', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ jd, history })
-    });
-    const data = await res.json();
-    if (!data.bullets) throw new Error('No bullets');
+function openModal(){ document.getElementById('modal').classList.add('open'); }
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
 
-    resultsEl.innerHTML = '<hr><div class="result-head">Resume-ready bullets</div>';
-    data.bullets.forEach(b => {
-      const div = document.createElement('div');
-      div.className = 'item';
-      div.innerHTML = `
-        <div class="skill-tag">${b.skill}</div>
-        <div class="raw">From: "${b.raw}"</div>
-        <div class="line">${b.line}</div>`;
-      resultsEl.appendChild(div);
-    });
+function saveCandidate(){
+  const name = document.getElementById('f-name').value.trim();
+  const office = document.getElementById('f-office').value.trim();
+  const state = document.getElementById('f-state').value.trim().toUpperCase();
+  if(!name||!office||!state){ alert('Name, office, and state are required.'); return; }
+  const endorsements = document.getElementById('f-endorse').value.split(',').map(e=>e.trim()).filter(Boolean);
+  const newC = {
+    id: Date.now(),
+    name, office,
+    city: document.getElementById('f-city').value.trim(),
+    county: document.getElementById('f-county').value.trim(),
+    state,
+    endorsements,
+    website: document.getElementById('f-site').value.trim(),
+    last_updated: new Date().toISOString().slice(0,10)
+  };
+  candidates.unshift(newC);
+  populateFilters();
+  render();
+  closeModal();
+  ['f-name','f-office','f-city','f-county','f-state','f-endorse','f-site'].forEach(id=>document.getElementById(id).value='');
+}
 
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'copyall';
-    copyBtn.textContent = 'Copy all bullets';
-    copyBtn.onclick = () => {
-      navigator.clipboard.writeText(data.bullets.map(b => `• ${b.line}`).join('\n'));
-    };
-    resultsEl.appendChild(copyBtn);
-    resultsEl.style.display = 'block';
-  } catch (e) {
-    errorEl.textContent = 'Something went wrong. Try again.';
-    errorEl.style.display = 'block';
-  } finally {
-    loadingEl.style.display = 'none';
-    genBtn.disabled = false;
-    genBtn.textContent = 'Rewrite for this job';
-  }
-});
+fetch('candidates.json')
+  .then(r=>r.json())
+  .then(data=>{ candidates=data; populateFilters(); render(); })
+  .catch(()=>{ document.getElementById('grid').innerHTML='<div class="empty">Could not load candidate data.</div>'; });
 </script>
 </body>
 </html>
